@@ -26,6 +26,8 @@ yarn-debug.log*
 yarn-error.log*
 
 # local env files
+.env
+!.env.Sample  # Keep the sample env file in the repository
 .env*.local
 
 # vercel
