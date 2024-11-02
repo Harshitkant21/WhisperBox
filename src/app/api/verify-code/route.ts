@@ -1,5 +1,6 @@
 import dbConnect from "@/lib/dbConnect";
 import UserModel from "@/model/User";
+import { verifySchema } from "@/schemas/verifySchema";
 
 export async function POST(request: Request) {
   await dbConnect();
@@ -9,7 +10,6 @@ export async function POST(request: Request) {
     const { searchParams } = new URL(request.url);
     const username = searchParams.get("username");
     const code = searchParams.get("code");
-
     if (!username || !code) {
       return (
         Response.json({
@@ -17,6 +17,19 @@ export async function POST(request: Request) {
           message: "Username and code are required",
         }),
         { status: 400 }
+      );
+    }
+
+    const validation = verifySchema.safeParse({ code });
+    if (!validation.success) {
+      return Response.json(
+        {
+          success: false,
+          message: validation.error.errors[0].message, //"Validation code must be 6 character long"
+        },
+        {
+          status: 400,
+        }
       );
     }
 
@@ -42,6 +55,9 @@ export async function POST(request: Request) {
     if (isCodeValid && isCodeNotExpired) {
       user.isVerified = true;
       await user.save();
+      user.verifyCode = "";
+      user.verifyCodeExpiry = new Date(0);
+
       return Response.json(
         {
           success: true,
