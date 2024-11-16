@@ -6,10 +6,7 @@ export async function POST(request: Request) {
   await dbConnect();
 
   try {
-    // Extract query parameters from the URL
-    const { searchParams } = new URL(request.url);
-    const username = searchParams.get("username");
-    const code = searchParams.get("code");
+    const { username, code } = await request.json();
     if (!username || !code) {
       return (
         Response.json({
